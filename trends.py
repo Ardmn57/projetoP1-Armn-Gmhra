@@ -33,26 +33,14 @@ def make_tweet(text, time, lat, lon):
 
 def tweet_words(tweet):
     """Return a list of the words in the text of a tweet."""
-    "*** YOUR CODE HERE ***"
-    retorno = []
-    words = tweet["text"]
-    temp = ''
-    for x in words:
-        if x == ' ':
-            retorno.append(temp)
-            temp = ''
-        else:
-            temp += x
-    retorno.append(temp)
-    return retorno
+    return (tweet["text"]).split()
 def tweet_time(tweet):
     """Return the datetime that represents when the tweet was posted."""
-    "*** YOUR CODE HERE ***"
-    return tweet["time"]
+    return (tweet)["time"]
 
 def tweet_location(tweet):
     """Return a position (see geo.py) that represents the tweet's location."""
-    "*** YOUR CODE HERE ***"
+    return(tweet['latitude'], tweet['longitude'])
 
 def tweet_string(tweet):
     """Return a string representing the tweet."""
@@ -70,8 +58,20 @@ def extract_words(text):
     >>> extract_words("paperclips! they're so awesome, cool, & useful!")
     ['paperclips', 'they', 're', 'so', 'awesome', 'cool', 'useful']
     """
-    "*** YOUR CODE HERE ***"
-    return text.split()  # Replace
+    listaPalavras = text.split()
+    resultado = []
+    for palavra in listaPalavras:
+        novaPalavra = ''
+        for caractere in range(0, len(palavra)):
+            if palavra[caractere] in ascii_letters:
+                novaPalavra += palavra[caractere]
+            elif novaPalavra != '':
+                resultado.append(novaPalavra)
+                novaPalavra = ''
+        if novaPalavra != '':
+            resultado.append(novaPalavra)
+    return resultado
+
 
 def make_sentiment(value):
     """Return a sentiment, which represents a value that may not exist.
@@ -87,15 +87,19 @@ def make_sentiment(value):
     """
     assert value is None or (value >= -1 and value <= 1), 'Illegal value'
     "*** YOUR CODE HERE ***"
+    return (value)
 
 def has_sentiment(s):
     """Return whether sentiment s has a value."""
-    "*** YOUR CODE HERE ***"
+    if s == None:
+        return False
+    else:
+        return True
 
 def sentiment_value(s):
     """Return the value of a sentiment s."""
     assert has_sentiment(s), 'No sentiment value'
-    "*** YOUR CODE HERE ***"
+    return s
 
 def get_word_sentiment(word):
     """Return a sentiment representing the degree of positive or negative
@@ -111,6 +115,7 @@ def get_word_sentiment(word):
     False
     """
     return make_sentiment(word_sentiments.get(word, None))
+    
 
 def analyze_tweet_sentiment(tweet):
     """ Return a sentiment representing the degree of positive or negative
@@ -130,9 +135,21 @@ def analyze_tweet_sentiment(tweet):
     >>> has_sentiment(analyze_tweet_sentiment(no_sentiment))
     False
     """
-    average = make_sentiment(None)
-    "*** YOUR CODE HERE ***"
-    return average
+    total = 0
+    z = 0
+    palavras = extract_words(tweet['text'])
+    for x in palavras:
+        sentimento = get_word_sentiment(x)
+        if sentimento == None:
+            pass
+        else:
+            total += sentimento
+            z += 1
+    if total == 0:
+        return None
+    else:
+        average = total/z
+        return average
 
 
 # Phase 2: The Geometry of Maps
@@ -157,7 +174,7 @@ def find_centroid(polygon):
     >>> find_centroid([p1, p2, p1])
     (1, 2, 0)
     """
-    "*** YOUR CODE HERE ***"
+  
 
 def find_center(polygons):
     """Compute the geographic center of a state, averaged over its polygons.
