@@ -174,8 +174,49 @@ def find_centroid(polygon):
     >>> find_centroid([p1, p2, p1])
     (1, 2, 0)
     """
-  
 
+    area = 0
+    reta = False
+    for x in range(0, len(polygon) - 1):
+        Y1 = (polygon[x])[1]
+        X1 = (polygon[x])[0]
+        prox_x = (polygon[x+1])[0]
+        prox_y = (polygon[x+1])[1]
+        area += X1 * prox_y - prox_x * Y1
+    area = abs(area/2)
+    if area == 0:
+        reta = True
+        area = int(0)
+    x = 0
+
+    Cx = 0
+    if reta == True:
+        Cx = (polygon[x])[0]
+    else:
+        for x in range(0, len(polygon) - 1):
+            Y1 = (polygon[x])[1]
+            X1 = (polygon[x])[0]
+            prox_x = (polygon[x+1])[0]
+            prox_y = (polygon[x+1])[1]
+            Cx += (X1 + prox_x) * (X1 * prox_y - prox_x * Y1)
+        Cx = abs(Cx/(6*area))
+    x = 0
+    
+    Cy = 0
+    if reta == True:
+        Cy = (polygon[x])[1]
+    else:
+        for x in range(0, len(polygon) - 1):
+            Y1 = (polygon[x])[1]
+            X1 = (polygon[x])[0]
+            prox_x = (polygon[x+1])[0]
+            prox_y = (polygon[x+1])[1]
+            Cy += (Y1 + prox_y) * (X1 * prox_y - prox_x * Y1)
+        Cy = abs(Cy/(6*area))
+
+    return (Cx, Cy, area)
+
+  
 def find_center(polygons):
     """Compute the geographic center of a state, averaged over its polygons.
 
@@ -197,7 +238,7 @@ def find_center(polygons):
     >>> round(longitude(hi), 5)
     -156.21763
     """
-    "*** YOUR CODE HERE ***"
+    for c in polygons:
 
 
 # Phase 3: The Mood of the Nation
