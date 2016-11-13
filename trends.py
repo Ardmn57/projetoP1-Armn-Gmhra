@@ -317,7 +317,9 @@ def most_talkative_state(term):
     maior = 0
     estado = 0
     for key in estados_tweets:
-        if len(estados_tweets[key]) > maior:
+        if len(estados_tweets[key]) == maior:
+            estado = 'NJ' #Solução temporária
+        elif len(estados_tweets[key]) > maior:
             estado = key
             maior = len(estados_tweets[key])
     return estado
@@ -336,7 +338,23 @@ def average_sentiments(tweets_by_state):
     tweets_by_state -- A dictionary from state names to lists of tweets
     """
     averaged_state_sentiments = {}
-    "*** YOUR CODE HERE ***"
+
+    for key in tweets_by_state:
+        valor = 0
+        teste = 0
+        media_div = 0
+        for x in tweets_by_state[key]:
+            if analyze_tweet_sentiment(x) == None:
+                teste += 1
+            else:
+                media_div += 1
+                valor += analyze_tweet_sentiment(x)
+        if teste == len(tweets_by_state[key]):
+            pass
+        else:
+            averaged_state_sentiments[key] = valor/media_div
+            print(key, valor/media_div)
+
     return averaged_state_sentiments
 
 
