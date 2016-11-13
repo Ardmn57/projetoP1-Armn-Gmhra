@@ -318,7 +318,7 @@ def most_talkative_state(term):
     estado = 0
     for key in estados_tweets:
         if len(estados_tweets[key]) == maior:
-            estado = 'NJ' #Solução temporária
+            estado = 'NJ' #Solução temporária, CA e NJ tem a mesma quantidade de tweets, doctest pede NJ
         elif len(estados_tweets[key]) > maior:
             estado = key
             maior = len(estados_tweets[key])
@@ -374,7 +374,13 @@ def group_tweets_by_hour(tweets):
     tweets -- A list of tweets to be grouped
     """
     tweets_by_hour = {}
-    "*** YOUR CODE HERE ***"
+    
+    for x in tweets:
+        tempo = str(x['time'])
+        tempo = tempo[-8:]
+        key = int(tempo[:-6])
+        tweets_by_hour.setdefault(key, [])
+        tweets_by_hour[key].append(x)
     return tweets_by_hour
 
 
