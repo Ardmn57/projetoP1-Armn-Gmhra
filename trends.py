@@ -353,7 +353,6 @@ def average_sentiments(tweets_by_state):
             pass
         else:
             averaged_state_sentiments[key] = valor/media_div
-            print(key, valor/media_div)
 
     return averaged_state_sentiments
 
