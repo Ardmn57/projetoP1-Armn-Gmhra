@@ -250,7 +250,6 @@ def find_center(polygons):
     return (centro_x, -(centro_y))
 
             
-
 # Phase 3: The Mood of the Nation
 
 def find_closest_state(tweet, state_centers):
@@ -271,7 +270,16 @@ def find_closest_state(tweet, state_centers):
     >>> find_closest_state(ny, us_centers)
     'NJ'
     """
-    "*** YOUR CODE HERE ***"
+    position1 = (tweet['latitude'], tweet['longitude'])
+    lista = list(state_centers.items())
+    menor = geo_distance(position1, lista[0][1])
+    estado = (lista[0])[0]
+    for x in lista:
+        if geo_distance(position1, x[1]) < menor:
+            menor = geo_distance(position1, x[1])
+            estado = x[0]
+    return estado
+    
 
 def group_tweets_by_state(tweets):
     """Return a dictionary that aggregates tweets by their nearest state center.
@@ -288,7 +296,13 @@ def group_tweets_by_state(tweets):
     '"Welcome to San Francisco" @ (38, -122)'
     """
     tweets_by_state = {}
-    "*** YOUR CODE HERE ***"
+    us_centers = {n: find_center(s) for n, s in us_states.items()}
+    for x in tweets:
+        print (x)
+        estado_prox = [find_closest_state(x, us_centers)]
+        print (estado_prox)
+        tweets_by_state[estado_prox] = x
+
     return tweets_by_state
 
 def most_talkative_state(term):
