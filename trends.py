@@ -298,12 +298,11 @@ def group_tweets_by_state(tweets):
     tweets_by_state = {}
     us_centers = {n: find_center(s) for n, s in us_states.items()}
     for x in tweets:
-        print (x)
-        estado_prox = [find_closest_state(x, us_centers)]
-        print (estado_prox)
-        tweets_by_state[estado_prox] = x
-
+        estado_prox = find_closest_state(x, us_centers)
+        tweets_by_state.setdefault(estado_prox, [])
+        tweets_by_state[estado_prox].append(x)
     return tweets_by_state
+                                         
 
 def most_talkative_state(term):
     """Return the state that has the largest number of tweets containing term.
@@ -314,8 +313,16 @@ def most_talkative_state(term):
     'NJ'
     """
     tweets = load_tweets(make_tweet, term)  # A list of tweets containing term
-    "*** YOUR CODE HERE ***"
-
+    estados_tweets = group_tweets_by_state(tweets)
+    maior = 0
+    estado = 0
+    for key in estados_tweets:
+        if len(estados_tweets[key]) > maior:
+            estado = key
+            maior = len(estados_tweets[key])
+    return estado
+        
+            
 def average_sentiments(tweets_by_state):
     """Calculate the average sentiment of the states by averaging over all
     the tweets from each state. Return the result as a dictionary from state
