@@ -199,7 +199,7 @@ def find_centroid(polygon):
             prox_x = (polygon[x+1])[0]
             prox_y = (polygon[x+1])[1]
             Cx += (X1 + prox_x) * (X1 * prox_y - prox_x * Y1)
-        Cx = abs(Cx/(6*area))
+        Cx = Cx/(6*area)
     x = 0
     
     Cy = 0
@@ -212,9 +212,9 @@ def find_centroid(polygon):
             prox_x = (polygon[x+1])[0]
             prox_y = (polygon[x+1])[1]
             Cy += (Y1 + prox_y) * (X1 * prox_y - prox_x * Y1)
-        Cy = abs(Cy/(6*area))
+        Cy = Cy/(6*area)
 
-    return (Cx, Cy, area)
+    return (abs(Cx), abs(Cy), abs(area))
 
   
 def find_center(polygons):
@@ -238,7 +238,15 @@ def find_center(polygons):
     >>> round(longitude(hi), 5)
     -156.21763
     """
+    area_total = 0
+    centro_x = 0
+    centro_y = 0
     for c in polygons:
+        area_total += (find_centroid(c))[2]
+        centro_x += (find_centroid(c)[0]) * (find_centroid(c)[2])/area_total
+        centro_y += (find_centroid(c)[1]) * (find_centroid(c)[2])/area_total
+    return (centro_x, centro_y)
+            
 
 
 # Phase 3: The Mood of the Nation
