@@ -28,19 +28,20 @@ def make_tweet(text, time, lat, lon):
     >>> latitude(p)
     38
     """
-    tweet = {'text': text, 'time': time, 'latitude': lat, 'longitude': lon}
-    return tweet
+    return {'text': text, 'time': time, 'latitude': lat, 'longitude': lon}
 
 def tweet_words(tweet):
     """Return a list of the words in the text of a tweet."""
-    return (tweet["text"]).split()
+    return tweet["text"].split()
+
 def tweet_time(tweet):
     """Return the datetime that represents when the tweet was posted."""
-    return (tweet)["time"]
+    return tweet['time']
 
 def tweet_location(tweet):
     """Return a position (see geo.py) that represents the tweet's location."""
-    return(tweet['latitude'], tweet['longitude'])
+    geo = make_position(tweet['latitude'], tweet['longitude'])
+    return geo 
 
 def tweet_string(tweet):
     """Return a string representing the tweet."""
@@ -58,20 +59,12 @@ def extract_words(text):
     >>> extract_words("paperclips! they're so awesome, cool, & useful!")
     ['paperclips', 'they', 're', 'so', 'awesome', 'cool', 'useful']
     """
-    listaPalavras = text.split()
-    resultado = []
-    for palavra in listaPalavras:
-        novaPalavra = ''
-        for caractere in range(0, len(palavra)):
-            if palavra[caractere] in ascii_letters:
-                novaPalavra += palavra[caractere]
-            elif novaPalavra != '':
-                resultado.append(novaPalavra)
-                novaPalavra = ''
-        if novaPalavra != '':
-            resultado.append(novaPalavra)
-    return resultado
 
+    alfa = ''
+    for caractere in text:
+        letra = caractere if caractere.isalpha() else ' '
+        alfa += letra
+    return alfa.split()
 
 def make_sentiment(value):
     """Return a sentiment, which represents a value that may not exist.
@@ -86,15 +79,11 @@ def make_sentiment(value):
     0.2
     """
     assert value is None or (value >= -1 and value <= 1), 'Illegal value'
-    "*** YOUR CODE HERE ***"
-    return (value)
+    return value
 
 def has_sentiment(s):
     """Return whether sentiment s has a value."""
-    if s == None:
-        return False
-    else:
-        return True
+    return False if not s else True
 
 def sentiment_value(s):
     """Return the value of a sentiment s."""
@@ -115,7 +104,6 @@ def get_word_sentiment(word):
     False
     """
     return make_sentiment(word_sentiments.get(word, None))
-    
 
 def analyze_tweet_sentiment(tweet):
     """ Return a sentiment representing the degree of positive or negative
@@ -135,26 +123,33 @@ def analyze_tweet_sentiment(tweet):
     >>> has_sentiment(analyze_tweet_sentiment(no_sentiment))
     False
     """
+
     total = 0
-    z = 0
-    c = 0
+    palavras_valor = 0
+    palavras_none = 0
     palavras = extract_words(tweet['text'])
     for x in palavras:
         sentimento = get_word_sentiment(x)
         if sentimento == None:
-            c += 1
-            pass
+            #Palavra nao tem valor
+            palavras_none += 1
         else:
             total += sentimento
-            z += 1
-    if c == len(extract_words(tweet['text'])):
+            palavras_valor += 1
+    if palavras_none == len(extract_words(tweet['text'])):
+        #Numero de palavras sem valor e igual ao numero total
+        #Nao existe nenhuma palavra com valor
         return make_sentiment(None)
+    
     elif total == 0:
         return 0
+    
     else:
-        average = total/z
+        average = total /palavras_valor
         return average
 
+    
+    
 
 # Phase 2: The Geometry of Maps
 
@@ -179,48 +174,33 @@ def find_centroid(polygon):
     (1, 2, 0)
     """
 
-    area = 0
-    reta = False
-    for x in range(0, len(polygon) - 1):
-        Y1 = (polygon[x])[1]
-        X1 = (polygon[x])[0]
-        prox_x = (polygon[x+1])[0]
-        prox_y = (polygon[x+1])[1]
-        area += X1 * prox_y - prox_x * Y1
-    area = abs(area/2)
-    if area == 0:
-        reta = True
-        area = int(0)
-    x = 0
-
-    Cx = 0
-    if reta == True:
-        Cx = (polygon[x])[0]
-    else:
-        for x in range(0, len(polygon) - 1):
-            Y1 = (polygon[x])[1]
-            X1 = (polygon[x])[0]
-            prox_x = (polygon[x+1])[0]
-            prox_y = (polygon[x+1])[1]
-            Cx += (X1 + prox_x) * (X1 * prox_y - prox_x * Y1)
-        Cx = Cx/(6*area)
-    x = 0
+    n = len(polygon)
+    primeira_posicao = polygon[0]
+    soma_cx = 0
+    soma_area = 0
+    soma_cy = 0
     
-    Cy = 0
-    if reta == True:
-        Cy = (polygon[x])[1]
-    else:
-        for x in range(0, len(polygon) - 1):
-            Y1 = (polygon[x])[1]
-            X1 = (polygon[x])[0]
-            prox_x = (polygon[x+1])[0]
-            prox_y = (polygon[x+1])[1]
-            Cy += (Y1 + prox_y) * (X1 * prox_y - prox_x * Y1)
-        Cy = Cy/(6*area)
+    for x in range(n-1):
+        area = (polygon[x][0] * polygon[x + 1][1]
+            - polygon[x + 1][0] * polygon[x][1])
+        soma_area += area
+        
+        cx = ((polygon[x][0] + polygon[x + 1][0]) * area)
+        soma_cx += cx
 
-    return (abs(Cx), abs(Cy), abs(area))
+        cy = ((polygon[x][1] + polygon[x + 1][1]) * area)
+        soma_cy += cy
 
-  
+    area = abs(1 /2 * soma_area)
+
+    if area == 0:
+        return (primeira_posicao[0], primeira_posicao[1], 0)
+    
+    cx = abs((1 /(6 * area)) * soma_cx)
+    cy = abs((1 /(6 * area)) * soma_cy)
+    
+    return (cx, cy, area)
+
 def find_center(polygons):
     """Compute the geographic center of a state, averaged over its polygons.
 
@@ -242,18 +222,23 @@ def find_center(polygons):
     >>> round(longitude(hi), 5)
     -156.21763
     """
+    
     area_total = 0
-    centro_x = 0
-    centro_y = 0
-    for c in polygons:
-        area_total += (find_centroid(c))[2]
-        centro_x += (find_centroid(c)[0]) * (find_centroid(c)[2])
-        centro_y += (find_centroid(c)[1]) * (find_centroid(c)[2])
-    centro_x = centro_x/area_total
-    centro_y = centro_y/area_total
-    return (centro_x, -(centro_y))
+    cx = 0
+    cy = 0
+    
+    for poligono in polygons:
+        centroide = find_centroid(poligono)
+        area_total += centroide[2]
+        cx += (centroide[0] * centroide[2])
+        cy += (centroide[1] * centroide[2])
 
-            
+    cx = cx /area_total
+    cy = cy /area_total
+
+    return (cx, - cy)
+
+
 # Phase 3: The Mood of the Nation
 
 def find_closest_state(tweet, state_centers):
@@ -274,16 +259,15 @@ def find_closest_state(tweet, state_centers):
     >>> find_closest_state(ny, us_centers)
     'NJ'
     """
-    position1 = (tweet['latitude'], tweet['longitude'])
-    lista = list(state_centers.items())
-    menor = geo_distance(position1, lista[0][1])
-    estado = (lista[0])[0]
-    for x in lista:
-        if geo_distance(position1, x[1]) < menor:
-            menor = geo_distance(position1, x[1])
-            estado = x[0]
+
+    tweet_geo = tweet_location(tweet)
+    menor_distancia = float('inf')
+    for chave in state_centers:
+        if geo_distance(tweet_geo, state_centers[chave]) < menor_distancia:
+            menor_distancia = geo_distance(tweet_geo, state_centers[chave])
+            estado = chave
     return estado
-    
+        
 
 def group_tweets_by_state(tweets):
     """Return a dictionary that aggregates tweets by their nearest state center.
@@ -300,13 +284,14 @@ def group_tweets_by_state(tweets):
     '"Welcome to San Francisco" @ (38, -122)'
     """
     tweets_by_state = {}
+    
     us_centers = {n: find_center(s) for n, s in us_states.items()}
+    
     for x in tweets:
-        estado_prox = find_closest_state(x, us_centers)
-        tweets_by_state.setdefault(estado_prox, [])
-        tweets_by_state[estado_prox].append(x)
+        estado = find_closest_state(x, us_centers)
+        tweets_by_state.setdefault(estado, [])
+        tweets_by_state[estado].append(x)
     return tweets_by_state
-                                         
 
 def most_talkative_state(term):
     """Return the state that has the largest number of tweets containing term.
@@ -317,18 +302,16 @@ def most_talkative_state(term):
     'NJ'
     """
     tweets = load_tweets(make_tweet, term)  # A list of tweets containing term
-    estados_tweets = group_tweets_by_state(tweets)
+
+    tweets_agrupados = group_tweets_by_state(tweets)
     maior = 0
-    estado = 0
-    for key in estados_tweets:
-        if len(estados_tweets[key]) == maior:
-            estado = 'NJ' #Solução temporária, CA e NJ tem a mesma quantidade de tweets, doctest pede NJ
-        elif len(estados_tweets[key]) > maior:
-            estado = key
-            maior = len(estados_tweets[key])
+
+    for chave in tweets_agrupados:
+        if len(tweets_agrupados[chave]) >= maior:
+            maior = len(tweets_agrupados[chave])
+            estado = chave
     return estado
-        
-            
+
 def average_sentiments(tweets_by_state):
     """Calculate the average sentiment of the states by averaging over all
     the tweets from each state. Return the result as a dictionary from state
@@ -343,22 +326,28 @@ def average_sentiments(tweets_by_state):
     """
     averaged_state_sentiments = {}
 
-    for key in tweets_by_state:
-        valor = 0
-        teste = 0
-        media_div = 0
-        for x in tweets_by_state[key]:
+    for chave in tweets_by_state:
+        valor_total = 0
+        tweets_none = 0
+        tweets_valor = 0
+        for x in tweets_by_state[chave]:
             if analyze_tweet_sentiment(x) == None:
-                teste += 1
+                #Tweet sem valor
+                tweets_none += 1
             else:
-                media_div += 1
-                valor += analyze_tweet_sentiment(x)
-        if teste == len(tweets_by_state[key]):
+                valor_total += analyze_tweet_sentiment(x)
+                tweets_valor += 1
+                
+        if tweets_none == len(tweets_by_state[chave]):
+            #Numero de tweets sem valor e igual ao numero total
+            #Nao existe nenhum tweet com valor
             pass
+        
         else:
-            averaged_state_sentiments[key] = valor/media_div
+            averaged_state_sentiments[chave] = valor_total /tweets_valor
 
     return averaged_state_sentiments
+
 
 
 # Phase 4: Into the Fourth Dimension
@@ -378,13 +367,15 @@ def group_tweets_by_hour(tweets):
     tweets -- A list of tweets to be grouped
     """
     tweets_by_hour = {}
-    
-    for x in tweets:
-        tempo = str(x['time'])
-        tempo = tempo[-8:]
-        key = int(tempo[:-6])
+
+    for tweet in tweets:
+        tempo = str(tweet['time'])[-8:]
+        chave = int(tempo[:-6])
         tweets_by_hour.setdefault(key, [])
         tweets_by_hour[key].append(x)
+    return tweets_by_hour
+
+    
     return tweets_by_hour
 
 
